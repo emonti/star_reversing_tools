@@ -5,7 +5,7 @@
 
 I'm making this readme and the associated tools available for posterity/historic sake in reference to my talk at ekoparty 2010. There may even be a few useful tools that came out of this like patchy.rb or ida_patcher I may resurrect at some point down the road.
 
-This is a collection of tools that were written in the process of reverse-engineering the jailbreakme.com (star) exploit by comex in the week or so following it's original release. They are all but totally useless now after comex released the source (see github.com/comex/star and github.com/emonti/star).
+This is a collection of tools that were written in the process of reverse-engineering the jailbreakme.com (star) exploit by comex in the week or so following it's original release. They are all but totally useless now after comex released the source (see http://github.com/comex/star and http://github.com/emonti/star).
 
 
 ======================================================================
