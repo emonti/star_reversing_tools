@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+#
+
+# turn on this flag if you have a cross-toolchain binutils objdump
+has_otool=true
+has_cross_objdump=true
+
+while fname=ARGV.shift
+  puts "\nFile: #{fname}"
+  dat = File.read(fname)
+
+  magic, cputype, cpusubtype, filetype, ncmds, sizeofcmds, flags = dat.unpack("V7")
+
+  puts "  magic:      0x%0.8x" % magic, 
+       "  cputype:    %d" % cputype,
+       "  cpusubtype: %d" % filetype,
+       "  ncmds:      %d" % ncmds,
+       "  sizeofcmds: %d" % sizeofcmds,
+       "  flags:      0x%0.8x" % flags,
+       "\n"
+
+  system("otool", "-lLhV", "-arch", "all", fname) if has_otool
+
+  system("objdump", "-hf", fname) if has_cross_objdump
+end
+

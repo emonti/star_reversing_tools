@@ -1,0 +1,24 @@
+#!/usr/bin/env ruby
+
+require 'origami'
+require 'pp'
+
+unless ARGV[0]
+  STDERR.puts("usage: #{File.basename $0} filename.pdf ...")
+  exit 1
+end
+
+n=nil
+while filename=ARGV.shift
+  pdf = Origami::PDF.read(filename)
+  if payload = pdf.grep(/Times Roman/).first
+    outf = filename.chomp(".pdf") << ".payload"
+    File.open(outf,"w"){|f| 
+      n=f.write payload.data
+    }
+    puts "** Wrote #{n} bytes to #{outf}"
+  else
+    puts "** No Times Roman payload found in #{filename}"
+  end
+end
+

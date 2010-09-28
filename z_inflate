@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+require File.join(File.dirname(__FILE__),'wadlib')
+
+unless infile=ARGV.shift and outfile=ARGV.shift and infile != outfile
+  STDERR.puts("usage: #{File.basename $0} infile outfile")
+  exit 1
+end
+
+dat = File.read(infile)
+File.open(outfile, "wb"){|out| out.write WadLib.z_inflate(dat)}

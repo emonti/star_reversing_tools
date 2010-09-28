@@ -1,0 +1,33 @@
+#!/usr/bin/env ruby
+require File.join(File.dirname(__FILE__),'wadlib')
+
+force,expand=nil
+if ARGV.include?("-f")
+  ARGV.delete("-f")
+  force = true
+end
+
+if ARGV.include?("-x")
+  ARGV.delete("-x")
+  expand = true
+end
+
+if ARGV.include?("-h")  or (fname=ARGV.shift).nil?
+  STDERR.puts "#{File.basename $0} [hxf] wad.bin [dir]",
+              "  -h help", "  -x expand fs", "  -f force"
+  exit 1
+end
+
+dir = ARGV.shift || $$.to_s(16)
+
+begin
+  File.open(fname, 'rb'){|io| 
+    WadLib.dump_wad(io, dir, :force => force, :inflate => expand) 
+  }
+rescue SystemCallError, RuntimeError
+  STDERR.puts $!
+  exit 1
+end
+exit 0
+
+

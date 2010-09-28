@@ -1,0 +1,32 @@
+#!/usr/bin/env ruby
+
+unless ARGV[0]
+  STDERR.puts("Usage: #{File.basename $0} filename.payload ...")
+  exit 1
+end
+
+# look for the 0xFEEDFACE mach-o signature followed by 
+# ARM cputype code.
+pattern = /\xce\xfa\xed\xfe(\x0c|\x00)\x00\x00(\x0c|\x00)/
+
+def write_dat(dat, fname)
+  puts "** writing #{dat.size} bytes to #{fname}"
+  File.open(fname, "w"){|f| f.write dat}
+end
+
+while fname=ARGV.shift
+  pdata = File.read(fname)
+
+  off = pdata.index(pattern)
+  write_dat(pdata[0,off], "#{fname.chomp(".payload")}.egg")
+  pdata = pdata[off .. -1]
+
+  n = 0
+
+  while pdata.size > 8 and off = pdata[1..-1].index(pattern)
+    write_dat(pdata[0, off+1], "#{fname.chomp(".payload")}.macho_#{n+=1}")
+    pdata = pdata[off+1 .. -1]
+  end
+
+  write_dat( pdata, "#{fname.chomp(".payload")}.macho_#{n+=1}")
+end

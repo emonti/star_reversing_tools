@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+require File.join(File.dirname(__FILE__),'wadlib')
+
+if ARGV.include?("-h") or (dir = ARGV.shift).nil?
+  STDERR.puts "usage: #{File.basename $0} dir [outfile]"
+  exit 1
+end 
+
+outfile = ARGV.shift  || "#{dir}#{$$}_wad.bin"
+
+begin
+  WadLib.check_deps
+  WadLib.pack_wad(dir, outfile)
+rescue SystemCallError, RuntimeError
+  STDERR.puts $!
+  exit 1
+end

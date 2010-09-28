@@ -1,0 +1,49 @@
+#!/usr/bin/env ruby
+
+require 'origami'
+require 'pp'
+
+pattern = /\xce\xfa\xed\xfe(\x0c|\x00)\x00\x00(\x0c|\x00)/
+def write_dat(dat, fname)
+  w=0
+  File.open(fname, "w"){|f| w=f.write dat}
+  puts "** Wrote #{w} bytes to #{fname}"
+end
+
+unless ARGV[0]
+  STDERR.puts("usage: #{File.basename $0} filename.pdf ...")
+  exit 1
+end
+
+n=nil
+while fname=ARGV.shift
+  pdf = Origami::PDF.read(fname)
+  if (payload=pdf.grep(/Times Roman/).first).nil?
+    puts "** No Times Roman payload found in #{fname}"
+  else
+    dir = "dump_#{File.basename(fname).chomp(".pdf")}"
+    Dir.mkdir(dir) unless File.directory?(dir)
+
+    pdata = payload.data
+    poutf = dir + "/" + fname.chomp(".pdf") << ".payload"
+    write_dat(pdata, poutf)
+
+    unless off = pdata.index(pattern)
+      STDERR.puts("** Error #{fname} doesn't to have MACH-O chunks")
+      exit 1
+    end
+
+    write_dat(pdata[0,off], "#{dir}/egg")
+    pdata = pdata[off .. -1]
+
+    n = 0
+
+    while pdata.size > 8 and off = pdata[1..-1].index(pattern)
+      write_dat(pdata[0, off+1], "#{dir}/macho_#{n+=1}")
+      pdata = pdata[off+1 .. -1]
+    end
+
+    write_dat( pdata, "#{dir}/macho_#{n+=1}")
+  end
+end
+

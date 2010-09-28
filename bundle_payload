@@ -1,0 +1,44 @@
+#!/usr/bin/env ruby
+require 'pp'
+require File.join(File.dirname(__FILE__),'wadlib')
+require 'zlib'
+
+
+force = (not ARGV.delete("-f").nil?)
+
+if( ARGV.include?("-h") or not (outfile=ARGV.shift and eggfile=ARGV.shift) )
+  STDERR.puts "usage: [-fh] #{File.basename $0} outfile.pdf egg chunks ...",
+              "  -h   help",
+              "  -f   force overwrite"
+  exit 1
+end
+
+
+chunks = [eggfile].concat(ARGV)
+our_data = ""
+chunks.each{ |chunk| our_data << File.read(chunk) }
+
+# bundle into the PDF template
+tmpl = File.read(File.join(File.dirname(__FILE__), "jailbreak_template.pdf"))
+
+# compress using z_stream
+our_data = Zlib::Deflate.deflate(our_data)
+
+out1, out2, out3 = tmpl.split("DATA_PLACEHOLDER")
+unless out1 and out2 and out3
+  STDERR.puts("something is wrong with the template. aborting")
+  exit 1
+end
+
+output = [out1, our_data.size.to_s, out2, our_data, out3].join
+
+# and output
+if outfile == "-"
+  STDOUT.write(output)
+else
+  if not force and File.exists?(outfile)
+    puts "File #{outfile} already exists. use -f to force overwrite"
+    exit 1
+  end
+  File.open(outfile,"wb"){|f| f.write(output) }
+end

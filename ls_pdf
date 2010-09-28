@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+require 'origami'
+require 'pp'
+
+unless filename = ARGV.shift
+  STDERR.puts("usage: #{File.basename $0} filename.pdf")
+  exit 1
+end
+
+pdf = Origami::PDF.read(filename)
+pp pdf.ls.map{|x| [x.class, x.respond_to?(:data)? x.data : x.to_s]}
